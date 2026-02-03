@@ -82,6 +82,32 @@
           </div>
 
           <p class="tiny" id="hsHint" role="status" aria-live="polite">Нажми на «мини‑карты».</p>
+
+          <div class="hs__actions">
+            <button id="hsRandomBtn" class="btn btn--small" type="button">Случайная любимая карта</button>
+            <button id="hsQuizBtn" class="btn btn--small" type="button">Мини‑викторина</button>
+          </div>
+
+          <div class="hs__gallery" aria-label="Любимые карты (галерея)">
+            <!-- заполняется JS -->
+          </div>
+
+          <p class="tiny">Подсказка Диме: кликай по картам — они раскрываются как карточки.</p>
+        </div>
+
+        <div id="hsModal" class="modal" aria-hidden="true" role="dialog" aria-label="Карточка Hearthstone">
+          <div class="modal__backdrop" data-close="1"></div>
+          <div class="modal__panel" role="document">
+            <button class="modal__close" type="button" data-close="1" aria-label="Закрыть">×</button>
+            <div class="modal__content">
+              <img id="hsModalImg" alt="" loading="lazy" />
+              <div class="modal__text">
+                <h3 id="hsModalTitle">Карта</h3>
+                <p id="hsModalBody" class="muted"></p>
+                <p id="hsModalMeta" class="tiny"></p>
+              </div>
+            </div>
+          </div>
         </div>
 
         <div class="chip-row" aria-label="Теги">

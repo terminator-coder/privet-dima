@@ -8,6 +8,14 @@
   const quoteText = $("quoteText");
   const quoteBtn = $("quoteBtn");
   const hsHint = $("hsHint");
+  const hsRandomBtn = $("hsRandomBtn");
+  const hsQuizBtn = $("hsQuizBtn");
+  const hsGallery = document.querySelector('.hs__gallery');
+  const hsModal = $("hsModal");
+  const hsModalImg = $("hsModalImg");
+  const hsModalTitle = $("hsModalTitle");
+  const hsModalBody = $("hsModalBody");
+  const hsModalMeta = $("hsModalMeta");
   const flagInput = $("flagInput");
   const flagBtn = $("flagBtn");
   const flagStatus = $("flagStatus");
@@ -64,6 +72,145 @@
       hsHint.textContent = HS[key];
       pulse(1);
     });
+  });
+
+  // Favorite cards (images from HearthstoneJSON art CDN)
+  const FAVS = [
+    {
+      id: 'EX1_134',
+      name: 'Си-7 Агент',
+      why: 'Супер-честный темп + точечный урон. Люблю такие карты: простые, но решающие.',
+      tag: 'tempo',
+    },
+    {
+      id: 'EX1_620',
+      name: 'Молтен-гигант',
+      why: 'Карта из эпохи, когда математика по хп была отдельной игрой.',
+      tag: 'swing',
+    },
+    {
+      id: 'EX1_620t',
+      name: 'Пасхалка',
+      why: 'Если не загрузится арт — тоже ок: Дима увидит, что я продумал фолбэк.',
+      tag: 'easter',
+      hidden: true,
+    },
+    {
+      id: 'EX1_561',
+      name: 'Алекстраза',
+      why: 'Иконический «поставил план на летал» одним движением.',
+      tag: 'lethal',
+    },
+    {
+      id: 'LOE_011',
+      name: 'Рено Джексон',
+      why: 'Кнопка «не умереть», которая часто выигрывает игру сама.',
+      tag: 'stabilize',
+    },
+    {
+      id: 'BOT_548',
+      name: 'Зиллиакс',
+      why: 'Когда нужна универсальность: таунт/хил/яд/магнит — и всё в одной карте.',
+      tag: 'utility',
+    },
+  ].filter(c => !c.hidden);
+
+  const artUrl = (id) => `https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${id}.png`;
+
+  function openModal(card) {
+    if (!hsModal) return;
+    hsModalImg.src = artUrl(card.id);
+    hsModalImg.alt = card.name;
+    hsModalTitle.textContent = card.name;
+    hsModalBody.textContent = card.why;
+    hsModalMeta.textContent = `id: ${card.id} · тег: ${card.tag}`;
+    hsModal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeModal() {
+    if (!hsModal) return;
+    hsModal.setAttribute('aria-hidden', 'true');
+    document.body.style.overflow = '';
+  }
+
+  hsModal?.addEventListener('click', (e) => {
+    const t = e.target;
+    if (t && t.getAttribute && t.getAttribute('data-close') === '1') closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Gallery render
+  if (hsGallery) {
+    hsGallery.innerHTML = '';
+    for (const card of FAVS) {
+      const el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'hs-item';
+      el.innerHTML = `
+        <img loading="lazy" src="${artUrl(card.id)}" alt="${card.name}">
+        <div class="hs-item__cap">
+          <p class="hs-item__title">${card.name}</p>
+          <p class="hs-item__sub">${card.why}</p>
+        </div>
+      `;
+      el.addEventListener('click', () => {
+        openModal(card);
+        pulse(1);
+      });
+      // fallback if blocked
+      el.querySelector('img')?.addEventListener('error', () => {
+        el.querySelector('img').src = `data:image/svg+xml;utf8,${encodeURIComponent(svgFallback(card.name))}`;
+      });
+      hsGallery.appendChild(el);
+    }
+  }
+
+  function svgFallback(title) {
+    return `
+      <svg xmlns="http://www.w3.org/2000/svg" width="800" height="520">
+        <defs>
+          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
+            <stop stop-color="#7C5CFF" offset="0"/>
+            <stop stop-color="#26E7A6" offset="1"/>
+          </linearGradient>
+        </defs>
+        <rect width="100%" height="100%" fill="#0A1024"/>
+        <circle cx="120" cy="120" r="190" fill="url(#g)" opacity="0.22"/>
+        <circle cx="700" cy="420" r="240" fill="url(#g)" opacity="0.18"/>
+        <text x="40" y="280" fill="#EAF0FF" font-size="36" font-family="system-ui, -apple-system, Segoe UI, Roboto">${escapeXml(title)}</text>
+        <text x="40" y="330" fill="#A9B4D0" font-size="18" font-family="system-ui, -apple-system, Segoe UI, Roboto">арт недоступен — но сайт всё равно красивый</text>
+      </svg>
+    `.trim();
+  }
+
+  function escapeXml(s){
+    return String(s).replace(/[<>&\"']/g, (c) => ({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;',"'":'&apos;'}[c]));
+  }
+
+  // Random card button
+  hsRandomBtn?.addEventListener('click', () => {
+    const card = FAVS[Math.floor(Math.random() * FAVS.length)];
+    openModal(card);
+    status.textContent = `Рандом‑пик: ${card.name}`;
+    pulse(2);
+  });
+
+  // Mini quiz: guess the card by hint
+  const QUIZ = [
+    { q: 'Карта‑универсал: таунт + хил + магнетизм (и ещё пачка слов)', a: 'Зиллиакс' },
+    { q: 'Кнопка «не умереть», если колода без дубликатов', a: 'Рено Джексон' },
+    { q: 'Темповый агент, который «щёлкает» и продолжает давить', a: 'Си-7 Агент' },
+  ];
+  hsQuizBtn?.addEventListener('click', () => {
+    const item = QUIZ[Math.floor(Math.random() * QUIZ.length)];
+    const guess = prompt(`HS мини‑викторина\n\nПодсказка: ${item.q}\n\nКто это?`);
+    if (guess == null) return;
+    const ok = guess.trim().toLowerCase().includes(item.a.toLowerCase());
+    status.textContent = ok ? 'Верно. Дима, хорош.' : `Почти. Ответ: ${item.a}`;
+    pulse(ok ? 2 : 1);
   });
 
   // Tiny confetti (no libs)
