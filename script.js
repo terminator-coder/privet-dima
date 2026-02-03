@@ -113,13 +113,15 @@
   ];
 
   function artStyle(card) {
-    // deterministic gradients by id
+    // use real local illustrations when available, otherwise fall back to procedural gradients
+    const illu = `./art/${card.id}.svg`;
     const n = card.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
     const a = (n % 360);
     const b = (a + 70) % 360;
     const c = (a + 140) % 360;
     return `
       background:
+        url('${illu}') center/cover no-repeat,
         radial-gradient(120px 80px at 25% 25%, hsla(${b}, 90%, 65%, .22), transparent 60%),
         radial-gradient(140px 90px at 80% 70%, hsla(${c}, 90%, 62%, .22), transparent 60%),
         linear-gradient(180deg, hsla(${a}, 60%, 55%, .18), rgba(0,0,0,.10));

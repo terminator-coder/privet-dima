@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="768" viewBox="0 0 1024 768">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2c1b4a"/>
+      <stop offset="1" stop-color="#0f2a3d"/>
+    </linearGradient>
+    <radialGradient id="glow" cx="30%" cy="30%" r="60%">
+      <stop offset="0" stop-color="#ffd166" stop-opacity=".55"/>
+      <stop offset="1" stop-color="#7c5cff" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="soft" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="10"/>
+    </filter>
+  </defs>
+
+  <rect width="1024" height="768" fill="url(#bg)"/>
+  <circle cx="220" cy="210" r="280" fill="url(#glow)"/>
+
+  <!-- potion + sparkles -->
+  <g transform="translate(330 160)">
+    <path d="M165 0h34v52c0 16 10 30 24 36l30 14c24 11 39 36 39 62v208c0 42-34 76-76 76H109c-42 0-76-34-76-76V164c0-26 15-51 39-62l30-14c14-6 24-20 24-36V0h39z" fill="#0b1226" opacity=".6"/>
+    <path d="M132 40h100v45c0 24 14 46 36 56l20 9c16 7 26 23 26 41v200c0 32-26 58-58 58H108c-32 0-58-26-58-58V191c0-18 10-34 26-41l20-9c22-10 36-32 36-56V40z" fill="#0a1024" stroke="rgba(255,255,255,.18)" stroke-width="4"/>
+    <path d="M122 242c54-42 168-42 220 0v150c0 28-22 50-50 50H172c-28 0-50-22-50-50V242z" fill="#26e7a6" opacity=".22"/>
+    <path d="M152 270c44-34 136-34 180 0v108c0 20-16 36-36 36H188c-20 0-36-16-36-36V270z" fill="#7c5cff" opacity=".18"/>
+
+    <g filter="url(#soft)">
+      <circle cx="110" cy="160" r="8" fill="#ffd166"/>
+      <circle cx="280" cy="130" r="6" fill="#5aa7ff"/>
+      <circle cx="260" cy="340" r="7" fill="#ffd166"/>
+      <circle cx="90" cy="360" r="6" fill="#5aa7ff"/>
+    </g>
+  </g>
+
+  <text x="64" y="708" fill="rgba(238,243,255,.92)" font-size="46" font-family="system-ui, -apple-system, Segoe UI, Roboto">Уличный Алхимик</text>
+  <text x="64" y="744" fill="rgba(168,179,210,.92)" font-size="22" font-family="system-ui, -apple-system, Segoe UI, Roboto">CardStone • оригинальная иллюстрация</text>
+</svg>
