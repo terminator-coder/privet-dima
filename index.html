@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>Привет, Дима</title>
+  <meta name="description" content="Небольшой, но качественный сайт-привет для Димы: хс, аниме, ктф." />
+  <link rel="preload" href="./styles.css" as="style" />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <a class="skip" href="#content">К контенту</a>
+
+  <canvas id="stars" aria-hidden="true"></canvas>
+
+  <header class="top">
+    <div class="brand" aria-label="Привет Диме">
+      <span class="brand__dot" aria-hidden="true"></span>
+      <span class="brand__text">privet-dima</span>
+    </div>
+
+    <nav class="nav" aria-label="Навигация">
+      <a href="#hs">хс</a>
+      <a href="#anime">аниме</a>
+      <a href="#ctf">ктф</a>
+    </nav>
+  </header>
+
+  <main id="content" class="main">
+    <section class="hero" aria-label="Приветствие">
+      <div class="hero__left">
+        <p class="kicker">Сайт-привет</p>
+        <h1>Привет, <span class="glow">Дима</span>.</h1>
+        <p class="lead">
+          Тут без воды: немного <b>хс</b>, щепотка <b>аниме</b> и честный <b>ктф</b>.
+          Сделано так, чтобы выглядело реально аккуратно.
+        </p>
+
+        <div class="hero__actions">
+          <button id="modeBtn" class="btn btn--primary" type="button">
+            Включить «режим Димы»
+          </button>
+          <button id="ctfBtn" class="btn" type="button">
+            Открыть CTF-панель
+          </button>
+        </div>
+
+        <p class="tiny" id="status" role="status" aria-live="polite"></p>
+      </div>
+
+      <div class="hero__right" aria-hidden="true">
+        <div class="orb">
+          <div class="orb__ring"></div>
+          <div class="orb__ring orb__ring--2"></div>
+          <div class="orb__ring orb__ring--3"></div>
+          <div class="orb__core"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="grid" aria-label="Карточки">
+      <article class="card" id="hs">
+        <h2>хс</h2>
+        <p class="muted">Хард-скиллы, чтобы всё работало и не разваливалось.</p>
+        <ul>
+          <li>Логика → порядок → результат</li>
+          <li>Скорость без хаоса</li>
+          <li>Точность, когда важно</li>
+        </ul>
+        <div class="chip-row" aria-label="Теги">
+          <span class="chip">focus</span>
+          <span class="chip">discipline</span>
+          <span class="chip">craft</span>
+        </div>
+      </article>
+
+      <article class="card" id="anime">
+        <h2>аниме</h2>
+        <p class="muted">Секция для настроения. Без спойлеров, только вайб.</p>
+        <div class="quote" role="group" aria-label="Цитата">
+          <p id="quoteText">«Если сейчас тяжело — значит ты прокачиваешься.»</p>
+          <button id="quoteBtn" class="link" type="button">ещё одну</button>
+        </div>
+        <div class="anime-bars" aria-hidden="true">
+          <div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </article>
+
+      <article class="card" id="ctf">
+        <h2>ктф</h2>
+        <p class="muted">Здесь всё по-честному: цели, подсказки, флаг.</p>
+
+        <div class="ctf">
+          <div class="ctf__row">
+            <span class="ctf__label">Задача:</span>
+            <span class="ctf__value">найти скрытую строку (hint ниже)</span>
+          </div>
+          <div class="ctf__row">
+            <span class="ctf__label">Hint:</span>
+            <span class="ctf__value">кнопка, которая «открывает панель»</span>
+          </div>
+
+          <details class="ctf__details">
+            <summary>Показать поле для флага</summary>
+            <div class="ctf__form">
+              <label class="sr-only" for="flagInput">Флаг</label>
+              <input id="flagInput" type="text" inputmode="text" autocomplete="off" placeholder="CTF{...}" />
+              <button id="flagBtn" class="btn btn--small" type="button">проверить</button>
+            </div>
+            <p class="tiny" id="flagStatus" role="status" aria-live="polite"></p>
+          </details>
+        </div>
+      </article>
+    </section>
+
+    <section class="footer" aria-label="Футер">
+      <p>
+        Сделано с уважением к вкусу Димы: аккуратно, быстро, с небольшим «пасхальным яйцом».
+      </p>
+      <p class="tiny">© <span id="year"></span> privet-dima · GitHub Pages</p>
+    </section>
+  </main>
+
+  <!--
+    CTF hint (for Dima):
+    the flag lives in the JS as an obfuscated string.
+    if you want it the honest way: open the CTF panel.
+  -->
+
+  <script defer src="./script.js"></script>
+</body>
+</html>
