@@ -86,6 +86,39 @@
           <div class="hs__actions">
             <button id="hsRandomBtn" class="btn btn--small" type="button">Случайная любимая карта</button>
             <button id="hsQuizBtn" class="btn btn--small" type="button">Мини‑викторина</button>
+            <button id="hsGameBtn" class="btn btn--small btn--primary" type="button">Мини‑игра: «Летал»</button>
+          </div>
+
+          <div id="hsGame" class="hs-game" aria-label="Мини-игра Hearthstone" hidden>
+            <div class="hs-game__top">
+              <div class="hs-game__stat">
+                <div class="hs-game__label">ХП противника</div>
+                <div class="hs-game__value"><span id="hsEnemyHp">0</span></div>
+              </div>
+              <div class="hs-game__stat">
+                <div class="hs-game__label">Мана</div>
+                <div class="hs-game__value"><span id="hsMana">0</span>/10</div>
+              </div>
+              <div class="hs-game__stat">
+                <div class="hs-game__label">Урон выбран</div>
+                <div class="hs-game__value"><span id="hsDmg">0</span></div>
+              </div>
+              <div class="hs-game__stat">
+                <div class="hs-game__label">Серия</div>
+                <div class="hs-game__value"><span id="hsStreak">0</span></div>
+              </div>
+            </div>
+
+            <p class="muted" id="hsGameHint">Цель: уложить противника за 1 ход, не превышая 10 маны. Клик по карте — выбрать/снять.</p>
+
+            <div id="hsHand" class="hs-hand" aria-label="Рука"></div>
+
+            <div class="hs-game__actions">
+              <button id="hsGameReset" class="btn btn--small" type="button">Сброс</button>
+              <button id="hsGameCheck" class="btn btn--small" type="button">Проверить летал</button>
+              <button id="hsGameNext" class="btn btn--small" type="button">Следующая</button>
+            </div>
+            <p class="tiny" id="hsGameStatus" role="status" aria-live="polite"></p>
           </div>
 
           <div class="hs__gallery" aria-label="Любимые карты (галерея)">

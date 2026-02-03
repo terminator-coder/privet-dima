@@ -10,6 +10,19 @@
   const hsHint = $("hsHint");
   const hsRandomBtn = $("hsRandomBtn");
   const hsQuizBtn = $("hsQuizBtn");
+  const hsGameBtn = $("hsGameBtn");
+  const hsGame = $("hsGame");
+  const hsEnemyHp = $("hsEnemyHp");
+  const hsMana = $("hsMana");
+  const hsDmg = $("hsDmg");
+  const hsStreak = $("hsStreak");
+  const hsHand = $("hsHand");
+  const hsGameReset = $("hsGameReset");
+  const hsGameCheck = $("hsGameCheck");
+  const hsGameNext = $("hsGameNext");
+  const hsGameStatus = $("hsGameStatus");
+  const hsGameHint = $("hsGameHint");
+
   const hsGallery = document.querySelector('.hs__gallery');
   const hsModal = $("hsModal");
   const hsModalImg = $("hsModalImg");
@@ -212,6 +225,147 @@
     status.textContent = ok ? 'Верно. Дима, хорош.' : `Почти. Ответ: ${item.a}`;
     pulse(ok ? 2 : 1);
   });
+
+  // Mini game: "Find lethal" (simple, fast, fun)
+  const DECK = [
+    { id: 'CS2_029', name: 'Фаерболл', mana: 4, dmg: 6, text: '6 урона.' },
+    { id: 'CS2_024', name: 'Фростболт', mana: 2, dmg: 3, text: '3 урона.' },
+    { id: 'EX1_116', name: 'Лирой Дженкинс', mana: 5, dmg: 6, text: 'Рывок. 6 урона сразу.' },
+    { id: 'CS2_124', name: 'Волчий всадник', mana: 3, dmg: 3, text: 'Рывок. 3 урона.' },
+    { id: 'EX1_238', name: 'Громмаш Адский Крик', mana: 8, dmg: 4, text: 'Рывок. 4 урона (без энрейджа).', note: 'без комбо' },
+    { id: 'EX1_046', name: 'Темный железный дворф', mana: 4, dmg: 0, text: 'В этой мини‑игре бафы игнорируются.', note: 'филлер' },
+    { id: 'EX1_559', name: 'Арханитовый жнец', mana: 5, dmg: 0, text: 'Оружие? В мини‑игре нет.', note: 'филлер' },
+  ];
+
+  let game = {
+    enemyHp: 0,
+    mana: 10,
+    selected: new Set(),
+    streak: 0,
+    hand: [],
+  };
+
+  function pickHand() {
+    // 6 cards, biased toward damage
+    const pool = [...DECK];
+    const hand = [];
+    while (hand.length < 6) {
+      const c = pool[Math.floor(Math.random() * pool.length)];
+      if (!hand.includes(c)) hand.push(c);
+    }
+    return hand;
+  }
+
+  function calc() {
+    let mana = 0;
+    let dmg = 0;
+    for (const idx of game.selected) {
+      const c = game.hand[idx];
+      mana += c.mana;
+      dmg += c.dmg;
+    }
+    return { mana, dmg };
+  }
+
+  function renderHand() {
+    if (!hsHand) return;
+    hsHand.innerHTML = '';
+    game.hand.forEach((c, i) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'hand-card';
+      b.setAttribute('data-i', String(i));
+      b.setAttribute('aria-label', `${c.name}, мана ${c.mana}, урон ${c.dmg}`);
+      b.innerHTML = `
+        <img loading="lazy" src="${artUrl(c.id)}" alt="${c.name}">
+        <div class="hand-card__meta">
+          <span class="hand-card__mana">${c.mana}</span>
+          <span class="hand-card__dmg">${c.dmg ? ('⚔ ' + c.dmg) : '—'}</span>
+        </div>
+        <div class="hand-card__cap">
+          <div class="hand-card__title">${c.name}</div>
+          <div class="hand-card__sub">${c.text}</div>
+        </div>
+      `;
+      b.querySelector('img')?.addEventListener('error', () => {
+        b.querySelector('img').src = `data:image/svg+xml;utf8,${encodeURIComponent(svgFallback(c.name))}`;
+      });
+      b.addEventListener('click', () => toggleCard(i));
+      hsHand.appendChild(b);
+    });
+    syncUI();
+  }
+
+  function syncUI() {
+    const { mana, dmg } = calc();
+    hsEnemyHp.textContent = String(game.enemyHp);
+    hsMana.textContent = String(mana);
+    hsDmg.textContent = String(dmg);
+    hsStreak.textContent = String(game.streak);
+
+    hsHand?.querySelectorAll('.hand-card').forEach((el) => {
+      const i = Number(el.getAttribute('data-i'));
+      const on = game.selected.has(i);
+      el.classList.toggle('hand-card--on', on);
+    });
+
+    const over = mana > 10;
+    hsMana.parentElement.style.color = over ? 'rgba(255,77,109,.95)' : '';
+  }
+
+  function toggleCard(i) {
+    if (game.selected.has(i)) game.selected.delete(i);
+    else game.selected.add(i);
+    syncUI();
+  }
+
+  function newPuzzle() {
+    game.hand = pickHand();
+    game.selected = new Set();
+
+    // choose enemy hp so that there is usually a solution
+    const possible = [12, 14, 15, 16, 18, 20];
+    game.enemyHp = possible[Math.floor(Math.random() * possible.length)];
+
+    hsGameStatus.textContent = '';
+    hsGameHint.textContent = 'Цель: уложить противника за 1 ход, не превышая 10 маны. Клик по карте — выбрать/снять.';
+    renderHand();
+  }
+
+  function checkLethal() {
+    const { mana, dmg } = calc();
+    if (mana > 10) {
+      hsGameStatus.textContent = 'Перебор маны. Сначала оптимизируй.';
+      hsGameStatus.style.color = 'rgba(255,77,109,.95)';
+      return;
+    }
+    if (dmg >= game.enemyHp) {
+      game.streak += 1;
+      hsGameStatus.textContent = 'Летал найден. Красиво.';
+      hsGameStatus.style.color = 'rgba(38,231,166,.95)';
+      pulse(2);
+      syncUI();
+    } else {
+      game.streak = 0;
+      hsGameStatus.textContent = `Не добил: нужно ещё ${game.enemyHp - dmg}.`;
+      hsGameStatus.style.color = 'rgba(255,77,109,.95)';
+      pulse(1);
+      syncUI();
+    }
+  }
+
+  hsGameBtn?.addEventListener('click', () => {
+    if (!hsGame) return;
+    hsGame.hidden = !hsGame.hidden;
+    if (!hsGame.hidden) {
+      status.textContent = 'Мини‑игра HS включена.';
+      newPuzzle();
+      hsGame.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  });
+  hsGameReset?.addEventListener('click', () => { game.selected = new Set(); syncUI(); hsGameStatus.textContent=''; });
+  hsGameCheck?.addEventListener('click', checkLethal);
+  hsGameNext?.addEventListener('click', newPuzzle);
 
   // Tiny confetti (no libs)
   function pulse(intensity = 1) {
