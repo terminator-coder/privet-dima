@@ -1,477 +1,692 @@
 (() => {
-  const $ = (id) => document.getElementById(id);
+  const $ = (sel) => document.querySelector(sel);
+  const $$ = (sel) => Array.from(document.querySelectorAll(sel));
 
-  const status = $("status");
-  const modeBtn = $("modeBtn");
-  const ctfBtn = $("ctfBtn");
-  const year = $("year");
-  const quoteText = $("quoteText");
-  const quoteBtn = $("quoteBtn");
-  const hsHint = $("hsHint");
-  const hsRandomBtn = $("hsRandomBtn");
-  const hsQuizBtn = $("hsQuizBtn");
-  const hsGameBtn = $("hsGameBtn");
-  const hsGame = $("hsGame");
-  const hsEnemyHp = $("hsEnemyHp");
-  const hsMana = $("hsMana");
-  const hsDmg = $("hsDmg");
-  const hsStreak = $("hsStreak");
-  const hsHand = $("hsHand");
-  const hsGameReset = $("hsGameReset");
-  const hsGameCheck = $("hsGameCheck");
-  const hsGameNext = $("hsGameNext");
-  const hsGameStatus = $("hsGameStatus");
-  const hsGameHint = $("hsGameHint");
-
-  const hsGallery = document.querySelector('.hs__gallery');
-  const hsModal = $("hsModal");
-  const hsModalImg = $("hsModalImg");
-  const hsModalTitle = $("hsModalTitle");
-  const hsModalBody = $("hsModalBody");
-  const hsModalMeta = $("hsModalMeta");
-  const flagInput = $("flagInput");
-  const flagBtn = $("flagBtn");
-  const flagStatus = $("flagStatus");
+  const app = document.getElementById('app');
+  const modal = document.getElementById('modal');
+  const modalBody = document.getElementById('modalBody');
+  const year = document.getElementById('year');
+  const soundBtn = document.getElementById('soundBtn');
+  const aboutBtn = document.getElementById('aboutBtn');
 
   year.textContent = String(new Date().getFullYear());
 
-  // Quotes (no spoilers, just vibe)
-  const QUOTES = [
-    "«Если сейчас тяжело — значит ты прокачиваешься.»",
-    "«Спокойно. План. Действие. Профит.»",
-    "«Дисциплина — это когда мотивация не нужна.»",
-    "«Не магия, а практика.»",
-    "«Победа — это сумма маленьких решений.»",
-    "«Сначала считай летал, потом красиво играй.»",
-  ];
-  let qi = 0;
-  quoteBtn?.addEventListener("click", () => {
-    qi = (qi + 1) % QUOTES.length;
-    quoteText.textContent = QUOTES[qi];
-  });
+  // ---- Audio (tiny, generated) ----
+  let soundOn = false;
+  let audioCtx = null;
 
-  // "Режим Димы" — subtle UX polish
-  let mode = false;
-  modeBtn?.addEventListener("click", () => {
-    mode = !mode;
-    document.documentElement.style.setProperty(
-      "--accent",
-      mode ? "#FF5CA8" : "#7C5CFF"
-    );
-    document.documentElement.style.setProperty(
-      "--accent2",
-      mode ? "#FFD166" : "#26E7A6"
-    );
-
-    status.textContent = mode
-      ? "Режим Димы включён: +10 к фокусу, +5 к спокойствию."
-      : "Режим Димы выключен: возвращаемся в базу.";
-
-    if (mode) pulse(2);
-  });
-
-  // Hearthstone mini-cards
-  const HS = {
-    mulligan: "Муллиган: оставляй план на 1–3 хода. В сомнениях — бери карту, которая ускоряет темп.",
-    tempo: "Темп: ставь угрозы так, чтобы оппонент тратил ману реактивно.",
-    value: "Вэлью: не жадничай. Вэлью хорошо, когда оно не отдаёт темп бесплатно.",
-    lethal: "Летал: сначала посчитай урон (с учётом силы героя/баффов), потом жми кнопки.",
-  };
-
-  document.querySelectorAll('.hs-card').forEach((b) => {
-    b.addEventListener('click', () => {
-      const key = b.getAttribute('data-card');
-      if (!key || !HS[key]) return;
-      hsHint.textContent = HS[key];
-      pulse(1);
-    });
-  });
-
-  // Favorite cards (images from HearthstoneJSON art CDN)
-  const FAVS = [
-    {
-      id: 'EX1_134',
-      name: 'Си-7 Агент',
-      why: 'Супер-честный темп + точечный урон. Люблю такие карты: простые, но решающие.',
-      tag: 'tempo',
-    },
-    {
-      id: 'EX1_620',
-      name: 'Молтен-гигант',
-      why: 'Карта из эпохи, когда математика по хп была отдельной игрой.',
-      tag: 'swing',
-    },
-    {
-      id: 'EX1_620t',
-      name: 'Пасхалка',
-      why: 'Если не загрузится арт — тоже ок: Дима увидит, что я продумал фолбэк.',
-      tag: 'easter',
-      hidden: true,
-    },
-    {
-      id: 'EX1_561',
-      name: 'Алекстраза',
-      why: 'Иконический «поставил план на летал» одним движением.',
-      tag: 'lethal',
-    },
-    {
-      id: 'LOE_011',
-      name: 'Рено Джексон',
-      why: 'Кнопка «не умереть», которая часто выигрывает игру сама.',
-      tag: 'stabilize',
-    },
-    {
-      id: 'BOT_548',
-      name: 'Зиллиакс',
-      why: 'Когда нужна универсальность: таунт/хил/яд/магнит — и всё в одной карте.',
-      tag: 'utility',
-    },
-  ].filter(c => !c.hidden);
-
-  const artUrl = (id) => `https://art.hearthstonejson.com/v1/render/latest/enUS/512x/${id}.png`;
-
-  function openModal(card) {
-    if (!hsModal) return;
-    hsModalImg.src = artUrl(card.id);
-    hsModalImg.alt = card.name;
-    hsModalTitle.textContent = card.name;
-    hsModalBody.textContent = card.why;
-    hsModalMeta.textContent = `id: ${card.id} · тег: ${card.tag}`;
-    hsModal.setAttribute('aria-hidden', 'false');
-    document.body.style.overflow = 'hidden';
+  function beep(type = 'click') {
+    if (!soundOn) return;
+    audioCtx = audioCtx || new (window.AudioContext || window.webkitAudioContext)();
+    const o = audioCtx.createOscillator();
+    const g = audioCtx.createGain();
+    o.type = 'sine';
+    const now = audioCtx.currentTime;
+    const f = type === 'play' ? 660 : type === 'hit' ? 220 : 440;
+    o.frequency.setValueAtTime(f, now);
+    g.gain.setValueAtTime(0.001, now);
+    g.gain.exponentialRampToValueAtTime(0.07, now + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.001, now + 0.12);
+    o.connect(g);
+    g.connect(audioCtx.destination);
+    o.start(now);
+    o.stop(now + 0.13);
   }
 
+  soundBtn.addEventListener('click', () => {
+    soundOn = !soundOn;
+    soundBtn.textContent = `Звук: ${soundOn ? 'вкл' : 'выкл'}`;
+    beep('click');
+  });
+
+  aboutBtn.addEventListener('click', () => {
+    openModal(`
+      <h2 style="margin:0 0 10px">CardStone</h2>
+      <p style="margin:0; color: rgba(168,179,210,.95); line-height:1.55">
+        Это мини‑клон по <b>логике</b> Hearthstone: матч (поле/рука/мана), коллекция, таверна.
+        Я намеренно не копирую ассеты/брендинг Blizzard. Всё — оригинальные UI и процедурная "арт‑подложка".
+      </p>
+      <p style="margin:12px 0 0; color: rgba(168,179,210,.95); line-height:1.55">
+        Если нужно ещё ближе к ощущению HS — можно докрутить: портреты, фреймы, анимации, ещё режимы.
+      </p>
+    `);
+  });
+
+  // ---- Modal ----
+  function openModal(html) {
+    modalBody.innerHTML = html;
+    modal.setAttribute('aria-hidden', 'false');
+    document.body.style.overflow = 'hidden';
+    beep('click');
+  }
   function closeModal() {
-    if (!hsModal) return;
-    hsModal.setAttribute('aria-hidden', 'true');
+    modal.setAttribute('aria-hidden', 'true');
     document.body.style.overflow = '';
   }
-
-  hsModal?.addEventListener('click', (e) => {
+  modal.addEventListener('click', (e) => {
     const t = e.target;
-    if (t && t.getAttribute && t.getAttribute('data-close') === '1') closeModal();
+    if (t?.getAttribute && t.getAttribute('data-close') === '1') closeModal();
   });
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') closeModal();
   });
 
-  // Gallery render
-  if (hsGallery) {
-    hsGallery.innerHTML = '';
-    for (const card of FAVS) {
-      const el = document.createElement('button');
-      el.type = 'button';
-      el.className = 'hs-item';
-      el.innerHTML = `
-        <img loading="lazy" src="${artUrl(card.id)}" alt="${card.name}">
-        <div class="hs-item__cap">
-          <p class="hs-item__title">${card.name}</p>
-          <p class="hs-item__sub">${card.why}</p>
-        </div>
-      `;
-      el.addEventListener('click', () => {
-        openModal(card);
-        pulse(1);
-      });
-      // fallback if blocked
-      el.querySelector('img')?.addEventListener('error', () => {
-        el.querySelector('img').src = `data:image/svg+xml;utf8,${encodeURIComponent(svgFallback(card.name))}`;
-      });
-      hsGallery.appendChild(el);
-    }
+  // ---- Router ----
+  const routes = ['home', 'play', 'collection', 'shop', 'tavern'];
+  let currentRoute = 'home';
+
+  function setRoute(r) {
+    if (!routes.includes(r)) r = 'home';
+    currentRoute = r;
+    history.replaceState({}, '', `#${r}`);
+    $$('.nav__btn').forEach((b) => {
+      b.setAttribute('aria-current', b.getAttribute('data-route') === r ? 'page' : 'false');
+    });
+    render();
   }
 
-  function svgFallback(title) {
+  $$('.nav__btn').forEach((b) => b.addEventListener('click', () => setRoute(b.getAttribute('data-route'))));
+  $$('.logo').forEach((el) => el.addEventListener('click', () => setRoute('home')));
+
+  function initFromHash() {
+    const h = (location.hash || '').replace('#', '').trim();
+    if (routes.includes(h)) setRoute(h);
+    else setRoute('home');
+  }
+
+  // ---- Cards (original set) ----
+  const CLASSES = ['Neutral', 'Mage', 'Rogue', 'Warrior'];
+  const RARITY = ['Common', 'Rare', 'Epic', 'Legendary'];
+
+  /** @type {{id:string,name:string,class:string,rarity:string,cost:number,attack:number,health:number,text:string,tags:string[]}[]} */
+  const ALL = [
+    { id:'CS_001', name:'Уличный Алхимик', class:'Mage', rarity:'Common', cost:2, attack:2, health:2, text:'Боевой клич: нанести 1 урон герою противника.', tags:['damage'] },
+    { id:'CS_002', name:'Карта‑Лезвие', class:'Rogue', rarity:'Common', cost:1, attack:1, health:2, text:'После атаки: +1 атака до конца хода.', tags:['tempo'] },
+    { id:'CS_003', name:'Страж Бастиона', class:'Warrior', rarity:'Rare', cost:3, attack:2, health:5, text:'Провокация.', tags:['taunt'] },
+    { id:'CS_004', name:'Аркан‑Импульс', class:'Mage', rarity:'Rare', cost:4, attack:0, health:0, text:'Заклинание: нанести 4 урона герою.', tags:['spell','damage'] },
+    { id:'CS_005', name:'Смелый Разведчик', class:'Neutral', rarity:'Common', cost:2, attack:3, health:1, text:'Простой темп. Иногда это всё.', tags:['tempo'] },
+    { id:'CS_006', name:'Механ‑Сборщик', class:'Neutral', rarity:'Rare', cost:5, attack:4, health:5, text:'Боевой клич: вытянуть карту.', tags:['value'] },
+    { id:'CS_007', name:'Сольный Летал', class:'Rogue', rarity:'Epic', cost:4, attack:4, health:2, text:'Рывок. (может атаковать сразу)', tags:['charge','damage'] },
+    { id:'CS_008', name:'Золотой Дракончик', class:'Neutral', rarity:'Legendary', cost:7, attack:7, health:7, text:'Боевой клич: если у противника ≤15 хп — нанести 3 урона.', tags:['finisher'] },
+    { id:'CS_009', name:'Магическая Печать', class:'Mage', rarity:'Epic', cost:2, attack:0, health:0, text:'Заклинание: получить 2 маны в этом ходу.', tags:['ramp','spell'] },
+    { id:'CS_010', name:'Капитан Рывок', class:'Warrior', rarity:'Epic', cost:5, attack:5, health:3, text:'Рывок. После атаки: получить 1 броню.', tags:['charge'] },
+  ];
+
+  function artStyle(card) {
+    // deterministic gradients by id
+    const n = card.id.split('').reduce((a,c)=>a+c.charCodeAt(0),0);
+    const a = (n % 360);
+    const b = (a + 70) % 360;
+    const c = (a + 140) % 360;
     return `
-      <svg xmlns="http://www.w3.org/2000/svg" width="800" height="520">
-        <defs>
-          <linearGradient id="g" x1="0" x2="1" y1="0" y2="1">
-            <stop stop-color="#7C5CFF" offset="0"/>
-            <stop stop-color="#26E7A6" offset="1"/>
-          </linearGradient>
-        </defs>
-        <rect width="100%" height="100%" fill="#0A1024"/>
-        <circle cx="120" cy="120" r="190" fill="url(#g)" opacity="0.22"/>
-        <circle cx="700" cy="420" r="240" fill="url(#g)" opacity="0.18"/>
-        <text x="40" y="280" fill="#EAF0FF" font-size="36" font-family="system-ui, -apple-system, Segoe UI, Roboto">${escapeXml(title)}</text>
-        <text x="40" y="330" fill="#A9B4D0" font-size="18" font-family="system-ui, -apple-system, Segoe UI, Roboto">арт недоступен — но сайт всё равно красивый</text>
-      </svg>
-    `.trim();
+      background:
+        radial-gradient(120px 80px at 25% 25%, hsla(${b}, 90%, 65%, .22), transparent 60%),
+        radial-gradient(140px 90px at 80% 70%, hsla(${c}, 90%, 62%, .22), transparent 60%),
+        linear-gradient(180deg, hsla(${a}, 60%, 55%, .18), rgba(0,0,0,.10));
+    `;
   }
 
-  function escapeXml(s){
-    return String(s).replace(/[<>&\"']/g, (c) => ({'<':'&lt;','>':'&gt;','&':'&amp;','\"':'&quot;',"'":'&apos;'}[c]));
+  // ---- Match ----
+  let match = null;
+
+  function newMatch() {
+    const deck = shuffle(ALL.filter(c => c.class === 'Neutral' || c.class === 'Mage').concat(ALL.filter(c=>c.class==='Neutral'))).slice(0, 14);
+    const enemyDeck = shuffle(ALL.filter(c => c.class === 'Neutral' || c.class === 'Rogue').concat(ALL.filter(c=>c.class==='Neutral'))).slice(0, 14);
+    match = {
+      turn: 1,
+      mana: 1,
+      manaMax: 1,
+      hp: 30,
+      enemyHp: 30,
+      deck,
+      enemyDeck,
+      hand: deck.splice(0, 3),
+      enemyHand: enemyDeck.splice(0, 3),
+      myLane: [],
+      enemyLane: [],
+      toast: 'Твой ход. Считай летал.',
+    };
+    beep('play');
   }
 
-  // Random card button
-  hsRandomBtn?.addEventListener('click', () => {
-    const card = FAVS[Math.floor(Math.random() * FAVS.length)];
-    openModal(card);
-    status.textContent = `Рандом‑пик: ${card.name}`;
-    pulse(2);
-  });
+  function drawCard(who='me') {
+    if (!match) return;
+    const d = who==='me' ? match.deck : match.enemyDeck;
+    const h = who==='me' ? match.hand : match.enemyHand;
+    if (d.length === 0) return;
+    h.push(d.shift());
+  }
 
-  // Mini quiz: guess the card by hint
-  const QUIZ = [
-    { q: 'Карта‑универсал: таунт + хил + магнетизм (и ещё пачка слов)', a: 'Зиллиакс' },
-    { q: 'Кнопка «не умереть», если колода без дубликатов', a: 'Рено Джексон' },
-    { q: 'Темповый агент, который «щёлкает» и продолжает давить', a: 'Си-7 Агент' },
-  ];
-  hsQuizBtn?.addEventListener('click', () => {
-    const item = QUIZ[Math.floor(Math.random() * QUIZ.length)];
-    const guess = prompt(`HS мини‑викторина\n\nПодсказка: ${item.q}\n\nКто это?`);
-    if (guess == null) return;
-    const ok = guess.trim().toLowerCase().includes(item.a.toLowerCase());
-    status.textContent = ok ? 'Верно. Дима, хорош.' : `Почти. Ответ: ${item.a}`;
-    pulse(ok ? 2 : 1);
-  });
+  function startTurn() {
+    match.turn += 1;
+    match.manaMax = Math.min(10, match.manaMax + 1);
+    match.mana = match.manaMax;
+    drawCard('me');
+    match.toast = 'Твой ход.';
+  }
 
-  // Mini game: "Find lethal" (simple, fast, fun)
-  const DECK = [
-    { id: 'CS2_029', name: 'Фаерболл', mana: 4, dmg: 6, text: '6 урона.' },
-    { id: 'CS2_024', name: 'Фростболт', mana: 2, dmg: 3, text: '3 урона.' },
-    { id: 'EX1_116', name: 'Лирой Дженкинс', mana: 5, dmg: 6, text: 'Рывок. 6 урона сразу.' },
-    { id: 'CS2_124', name: 'Волчий всадник', mana: 3, dmg: 3, text: 'Рывок. 3 урона.' },
-    { id: 'EX1_238', name: 'Громмаш Адский Крик', mana: 8, dmg: 4, text: 'Рывок. 4 урона (без энрейджа).', note: 'без комбо' },
-    { id: 'EX1_116', name: 'Лирой Дженкинс', mana: 5, dmg: 6, text: 'Рывок. 6 урона сразу.' },
-    { id: 'CS2_124', name: 'Волчий всадник', mana: 3, dmg: 3, text: 'Рывок. 3 урона.' },
-  ];
+  function endTurn() {
+    // simple enemy: play first affordable minion/spell, then attack face with all minions
+    match.toast = 'Ход противника…';
 
-  let game = {
-    enemyHp: 0,
-    mana: 10,
-    selected: new Set(),
-    streak: 0,
-    hand: [],
+    // enemy gain mana
+    const mMax = Math.min(10, Math.floor((match.turn+1)/2));
+    let mana = mMax;
+
+    // play cards
+    match.enemyHand = match.enemyHand.filter((c) => {
+      if (c.cost <= mana) {
+        mana -= c.cost;
+        if (c.tags.includes('spell')) {
+          // spell to face
+          const dmg = spellDamage(c);
+          match.hp = Math.max(0, match.hp - dmg);
+        } else {
+          match.enemyLane.push(cloneMinion(c));
+        }
+        return false;
+      }
+      return true;
+    });
+
+    // attacks
+    let dmg = match.enemyLane.reduce((a,m)=>a+m.attack,0);
+    match.hp = Math.max(0, match.hp - dmg);
+
+    // draw
+    drawCard('enemy');
+
+    if (match.hp === 0 || match.enemyHp === 0) return;
+    startTurn();
+  }
+
+  function spellDamage(c) {
+    if (c.id === 'CS_004') return 4;
+    if (c.id === 'CS_001') return 1;
+    if (c.id === 'CS_009') return 0;
+    return 2;
+  }
+
+  function cloneMinion(c) {
+    // minion stats
+    let atk = c.attack;
+    let hp = c.health;
+    // legendary battlecry
+    if (c.id === 'CS_008' && match.enemyHp <= 15) match.enemyHp = Math.max(0, match.enemyHp - 3);
+    return { ...c, attack: atk, health: hp };
+  }
+
+  function playCardFromHand(i) {
+    const c = match.hand[i];
+    if (!c) return;
+    if (c.cost > match.mana) {
+      match.toast = 'Не хватает маны.';
+      beep('hit');
+      render();
+      return;
+    }
+    match.mana -= c.cost;
+
+    if (c.tags.includes('spell')) {
+      if (c.id === 'CS_009') {
+        match.mana = Math.min(10, match.mana + 2);
+      } else {
+        match.enemyHp = Math.max(0, match.enemyHp - spellDamage(c));
+      }
+    } else {
+      match.myLane.push(cloneMinion(c));
+      // CS_001 battlecry
+      if (c.id === 'CS_001') match.enemyHp = Math.max(0, match.enemyHp - 1);
+    }
+
+    match.hand.splice(i, 1);
+    beep('click');
+    if (match.enemyHp === 0) {
+      match.toast = 'Победа. Дима доволен.';
+    }
+    render();
+  }
+
+  function attackFace() {
+    const dmg = match.myLane.reduce((a,m)=>a+m.attack,0);
+    match.enemyHp = Math.max(0, match.enemyHp - dmg);
+    match.toast = dmg ? `Атака в лицо: -${dmg}.` : 'Некем атаковать.';
+    beep('hit');
+    if (match.enemyHp === 0) match.toast = 'Победа. Красиво.';
+    render();
+  }
+
+  // ---- Views ----
+  function viewHome() {
+    return `
+      <section class="panel hero">
+        <div>
+          <h1>CardStone</h1>
+          <p>
+            Дима, это для тебя: мини‑клон по логике карточного баттлера.
+            <b>Играть</b> — быстрый матч (рука/мана/поле), <b>Коллекция</b> — просмотр карт,
+            <b>Таверна</b> — режимы на один вечер.
+          </p>
+          <div class="hero__actions">
+            <button class="btn btn--primary" data-go="play">Запустить матч</button>
+            <button class="btn" data-go="collection">Открыть коллекцию</button>
+            <button class="btn" data-go="tavern">В таверну</button>
+          </div>
+          <div class="toast" style="margin-top:10px">
+            P.S. Это не копия бренда/ассетов — просто ощущение и логика. Если хочешь — сделаю ещё ближе.
+          </div>
+        </div>
+        <div class="card" style="align-self:stretch">
+          <h2>Что нового</h2>
+          <p>1) Матч: игра карт из руки, мана, поле, атака в лицо.</p>
+          <p>2) Коллекция: поиск/фильтр, просмотр описаний.</p>
+          <p>3) Таверна: мини‑режимы (дальше расширю).</p>
+        </div>
+      </section>
+
+      <section class="panel" style="margin-top:12px">
+        <div class="grid">
+          <div class="card"><h2>Играть</h2><p>Один быстрый бой: поставить существ, нажать «атака в лицо», считать летал.</p></div>
+          <div class="card"><h2>Коллекция</h2><p>Список карт CardStone, фильтры, просмотр описания.</p></div>
+          <div class="card"><h2>Таверна</h2><p>Мини‑режимы: «Летал за ход», «Собери комбу» (добавлю постепенно).</p></div>
+        </div>
+      </section>
+    `;
+  }
+
+  function viewPlay() {
+    if (!match) newMatch();
+
+    const manaCr = Array.from({length: 10}, (_,i)=>`<span class="crystal ${i < match.mana ? 'on':''}"></span>`).join('');
+
+    return `
+      <section class="panel match">
+        <div class="hud">
+          <div class="badge">
+            <div class="heroChip">
+              <div class="portrait" aria-hidden="true"></div>
+              <div>
+                <div class="badge__title">Дима</div>
+                <div class="badge__muted">CardStone</div>
+              </div>
+            </div>
+            <div class="stat">
+              <span class="pill hp">ХП ${match.hp}</span>
+              <span class="pill mana">Мана ${match.mana}/${match.manaMax}</span>
+            </div>
+          </div>
+
+          <div class="badge">
+            <div class="badge__title">Мана</div>
+            <div class="crystals" aria-label="Кристаллы маны">${manaCr}</div>
+          </div>
+
+          <div class="badge">
+            <div class="heroChip">
+              <div class="portrait" aria-hidden="true"></div>
+              <div>
+                <div class="badge__title">Противник</div>
+                <div class="badge__muted">бот‑темповик</div>
+              </div>
+            </div>
+            <div class="stat">
+              <span class="pill hp">ХП ${match.enemyHp}</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="board" id="board">
+          <div class="lanes">
+            <div class="lane" id="enemyLane">
+              <div class="lane__label">Поле противника</div>
+              ${match.enemyLane.map(minionHTML).join('')}
+            </div>
+            <div class="lane" id="myLane">
+              <div class="lane__label">Твоё поле (перетаскивай карты сюда)</div>
+              ${match.myLane.map(minionHTML).join('')}
+            </div>
+          </div>
+        </div>
+
+        <div class="controls">
+          <div class="hand" id="hand" aria-label="Рука">
+            ${match.hand.map((c, i)=>handCardHTML(c,i)).join('')}
+          </div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap">
+            <button class="btn btn--small" id="attackBtn">Атака в лицо</button>
+            <button class="btn btn--small" id="endTurnBtn">Конец хода</button>
+            <button class="btn btn--small btn--danger" id="restartBtn">Новый матч</button>
+          </div>
+        </div>
+        <div class="toast" id="toast">${escapeHtml(match.toast)}</div>
+      </section>
+    `;
+  }
+
+  function minionHTML(m) {
+    return `
+      <div class="minion" title="${escapeHtml(m.text)}">
+        <div class="minion__art" style="${artStyle(m)}"></div>
+        <div class="minion__meta">
+          <span class="smallPill a">${m.attack}</span>
+          <span class="smallPill h">${m.health}</span>
+        </div>
+        <div class="minion__body">
+          <div class="minion__name">${escapeHtml(m.name)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  function handCardHTML(c, i) {
+    return `
+      <button class="cardBtn" draggable="true" data-hand="${i}" title="${escapeHtml(c.text)}">
+        <div class="cardBtn__art" style="${artStyle(c)}"></div>
+        <div class="cardBtn__meta">
+          <span class="smallPill m">${c.cost}</span>
+          <span class="smallPill a">${c.attack}</span>
+          <span class="smallPill h">${c.health}</span>
+        </div>
+        <div class="cardBtn__body">
+          <div class="cardBtn__name">${escapeHtml(c.name)}</div>
+          <div class="cardBtn__text">${escapeHtml(c.text)}</div>
+        </div>
+      </button>
+    `;
+  }
+
+  function viewCollection() {
+    const q = state.colQuery;
+    const cls = state.colClass;
+    const rar = state.colRarity;
+
+    const items = ALL.filter(c => {
+      if (cls !== 'All' && c.class !== cls) return false;
+      if (rar !== 'All' && c.rarity !== rar) return false;
+      if (q && !c.name.toLowerCase().includes(q.toLowerCase())) return false;
+      return true;
+    });
+
+    return `
+      <section class="panel">
+        <div class="toolbar">
+          <input class="input" placeholder="Поиск карты…" value="${escapeAttr(q)}" id="colSearch" />
+          <select class="select" id="colClass">
+            ${['All', ...CLASSES].map(x=>`<option ${x===cls?'selected':''}>${x}</option>`).join('')}
+          </select>
+          <select class="select" id="colRarity">
+            ${['All', ...RARITY].map(x=>`<option ${x===rar?'selected':''}>${x}</option>`).join('')}
+          </select>
+          <button class="btn btn--small" id="colRandom">Случайная</button>
+        </div>
+
+        <div class="collection" id="colGrid">
+          ${items.map(c => `
+            <div class="collect" data-card="${c.id}">
+              <div class="collect__art" style="${artStyle(c)}"></div>
+              <div class="collect__body">
+                <div class="collect__name">${escapeHtml(c.name)}</div>
+                <div class="collect__sub">${c.class} · ${c.rarity} · ${c.cost} маны</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  function viewShop() {
+    return `
+      <section class="panel" style="padding: 16px">
+        <h2 style="margin:0 0 10px">Магазин</h2>
+        <p style="margin:0; color: rgba(168,179,210,.95); line-height:1.55">
+          Это заглушка. Можно сделать прикольный "магазин": пак‑опенинг с анимацией, пыль/крафт,
+          и чисто для кайфа — без платежей.
+        </p>
+        <div class="hero__actions" style="margin-top:12px">
+          <button class="btn btn--primary" id="packBtn">Открыть пак (демо)</button>
+        </div>
+        <div class="toast" id="shopToast" style="margin-top:10px"></div>
+      </section>
+    `;
+  }
+
+  function viewTavern() {
+    return `
+      <section class="panel" style="padding: 16px">
+        <h2 style="margin:0 0 10px">Таверна</h2>
+        <p style="margin:0; color: rgba(168,179,210,.95); line-height:1.55">
+          Режимы "на вечер". Сейчас: <b>Летал за ход</b> (встроен в матч — атака в лицо).
+          Дальше добавлю: "Арена‑драфт" (пик из 3), "Паззлы" (точный летал).
+        </p>
+        <div class="hero__actions" style="margin-top:12px">
+          <button class="btn btn--primary" data-go="play">В бой</button>
+          <button class="btn" id="draftBtn">Драфт (демо)</button>
+        </div>
+        <div class="toast" id="tavernToast" style="margin-top:10px"></div>
+      </section>
+    `;
+  }
+
+  // ---- State for collection ----
+  const state = {
+    colQuery: '',
+    colClass: 'All',
+    colRarity: 'All',
   };
 
-  function pickHand() {
-    // 6 cards, biased toward damage
-    const pool = [...DECK];
-    const hand = [];
-    while (hand.length < 6) {
-      const c = pool[Math.floor(Math.random() * pool.length)];
-      if (!hand.includes(c)) hand.push(c);
-    }
-    return hand;
+  function render() {
+    let html = '';
+    if (currentRoute === 'home') html = viewHome();
+    if (currentRoute === 'play') html = viewPlay();
+    if (currentRoute === 'collection') html = viewCollection();
+    if (currentRoute === 'shop') html = viewShop();
+    if (currentRoute === 'tavern') html = viewTavern();
+
+    app.innerHTML = html;
+
+    // wire generic go buttons
+    $$('[data-go]').forEach((b) => b.addEventListener('click', () => setRoute(b.getAttribute('data-go'))));
+
+    if (currentRoute === 'play') wireMatch();
+    if (currentRoute === 'collection') wireCollection();
+    if (currentRoute === 'shop') wireShop();
+    if (currentRoute === 'tavern') wireTavern();
   }
 
-  function calc() {
-    let mana = 0;
-    let dmg = 0;
-    for (const idx of game.selected) {
-      const c = game.hand[idx];
-      mana += c.mana;
-      dmg += c.dmg;
-    }
-    return { mana, dmg };
-  }
+  function wireMatch() {
+    $('#attackBtn')?.addEventListener('click', attackFace);
+    $('#endTurnBtn')?.addEventListener('click', () => { beep('click'); endTurn(); render(); });
+    $('#restartBtn')?.addEventListener('click', () => { match = null; newMatch(); render(); });
 
-  function renderHand() {
-    if (!hsHand) return;
-    hsHand.innerHTML = '';
-    game.hand.forEach((c, i) => {
-      const b = document.createElement('button');
-      b.type = 'button';
-      b.className = 'hand-card';
-      b.setAttribute('data-i', String(i));
-      b.setAttribute('aria-label', `${c.name}, мана ${c.mana}, урон ${c.dmg}`);
-      b.innerHTML = `
-        <img loading="lazy" src="${artUrl(c.id)}" alt="${c.name}">
-        <div class="hand-card__meta">
-          <span class="hand-card__mana">${c.mana}</span>
-          <span class="hand-card__dmg">${c.dmg ? ('⚔ ' + c.dmg) : '—'}</span>
-        </div>
-        <div class="hand-card__cap">
-          <div class="hand-card__title">${c.name}</div>
-          <div class="hand-card__sub">${c.text}</div>
-        </div>
-      `;
-      b.querySelector('img')?.addEventListener('error', () => {
-        b.querySelector('img').src = `data:image/svg+xml;utf8,${encodeURIComponent(svgFallback(c.name))}`;
+    // click to play
+    $$('#hand .cardBtn').forEach((b) => {
+      b.addEventListener('click', () => {
+        const i = Number(b.getAttribute('data-hand'));
+        playCardFromHand(i);
       });
-      b.addEventListener('click', () => toggleCard(i));
-      hsHand.appendChild(b);
-    });
-    syncUI();
-  }
-
-  function syncUI() {
-    const { mana, dmg } = calc();
-    hsEnemyHp.textContent = String(game.enemyHp);
-    hsMana.textContent = String(mana);
-    hsDmg.textContent = String(dmg);
-    hsStreak.textContent = String(game.streak);
-
-    hsHand?.querySelectorAll('.hand-card').forEach((el) => {
-      const i = Number(el.getAttribute('data-i'));
-      const on = game.selected.has(i);
-      el.classList.toggle('hand-card--on', on);
     });
 
-    const over = mana > 10;
-    hsMana.parentElement.style.color = over ? 'rgba(255,77,109,.95)' : '';
+    // drag drop to myLane
+    const myLane = $('#myLane');
+    const hand = $('#hand');
+
+    hand?.addEventListener('dragstart', (e) => {
+      const t = e.target;
+      const i = t?.getAttribute?.('data-hand');
+      if (!i) return;
+      e.dataTransfer.setData('text/plain', i);
+      beep('click');
+    });
+
+    myLane?.addEventListener('dragover', (e) => { e.preventDefault(); });
+    myLane?.addEventListener('drop', (e) => {
+      e.preventDefault();
+      const i = Number(e.dataTransfer.getData('text/plain'));
+      playCardFromHand(i);
+    });
   }
 
-  function toggleCard(i) {
-    if (game.selected.has(i)) game.selected.delete(i);
-    else game.selected.add(i);
-    syncUI();
-  }
+  function wireCollection() {
+    const input = $('#colSearch');
+    const cls = $('#colClass');
+    const rar = $('#colRarity');
 
-  function newPuzzle() {
-    game.hand = pickHand();
-    game.selected = new Set();
+    input?.addEventListener('input', () => { state.colQuery = input.value; render(); });
+    cls?.addEventListener('change', () => { state.colClass = cls.value; render(); });
+    rar?.addEventListener('change', () => { state.colRarity = rar.value; render(); });
 
-    // choose enemy hp so that there is usually a solution
-    const possible = [12, 14, 15, 16, 18, 20];
-    game.enemyHp = possible[Math.floor(Math.random() * possible.length)];
+    $('#colRandom')?.addEventListener('click', () => {
+      const items = ALL.slice();
+      const c = items[Math.floor(Math.random()*items.length)];
+      showCard(c);
+    });
 
-    hsGameStatus.textContent = '';
-    hsGameHint.textContent = 'Цель: уложить противника за 1 ход, не превышая 10 маны. Клик по карте — выбрать/снять.';
-    renderHand();
-  }
-
-  function checkLethal() {
-    const { mana, dmg } = calc();
-    if (mana > 10) {
-      hsGameStatus.textContent = 'Перебор маны. Сначала оптимизируй.';
-      hsGameStatus.style.color = 'rgba(255,77,109,.95)';
-      return;
-    }
-    if (dmg >= game.enemyHp) {
-      game.streak += 1;
-      hsGameStatus.textContent = 'Летал найден. Красиво.';
-      hsGameStatus.style.color = 'rgba(38,231,166,.95)';
-      pulse(2);
-      syncUI();
-    } else {
-      game.streak = 0;
-      hsGameStatus.textContent = `Не добил: нужно ещё ${game.enemyHp - dmg}.`;
-      hsGameStatus.style.color = 'rgba(255,77,109,.95)';
-      pulse(1);
-      syncUI();
-    }
-  }
-
-  hsGameBtn?.addEventListener('click', () => {
-    if (!hsGame) return;
-    hsGame.hidden = !hsGame.hidden;
-    if (!hsGame.hidden) {
-      status.textContent = 'Мини‑игра HS включена.';
-      newPuzzle();
-      hsGame.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-  hsGameReset?.addEventListener('click', () => { game.selected = new Set(); syncUI(); hsGameStatus.textContent=''; });
-  hsGameCheck?.addEventListener('click', checkLethal);
-  hsGameNext?.addEventListener('click', newPuzzle);
-
-  // Tiny confetti (no libs)
-  function pulse(intensity = 1) {
-    const count = 18 * intensity;
-    for (let i = 0; i < count; i++) {
-      const p = document.createElement("span");
-      p.className = "p";
-      p.style.left = `${Math.random() * 100}%`;
-      p.style.top = `${(Math.random() * 20) + 4}%`;
-      p.style.opacity = String(0.7 + Math.random() * 0.3);
-      p.style.transform = `translate(-50%, -50%) rotate(${Math.random() * 360}deg)`;
-      p.style.background = Math.random() > 0.5
-        ? "rgba(124,92,255,.95)"
-        : "rgba(38,231,166,.90)";
-      document.body.appendChild(p);
-      const dx = (Math.random() - 0.5) * 220;
-      const dy = 220 + Math.random() * 260;
-      p.animate([
-        { transform: p.style.transform, filter: "blur(0px)", offset: 0 },
-        { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${Math.random() * 720}deg)`, filter: "blur(0.3px)", offset: 1 },
-      ], {
-        duration: 1000 + Math.random() * 700,
-        easing: "cubic-bezier(.2,.7,.2,1)",
+    $$('#colGrid .collect').forEach((el) => {
+      el.addEventListener('click', () => {
+        const id = el.getAttribute('data-card');
+        const c = ALL.find(x=>x.id===id);
+        if (c) showCard(c);
       });
-      setTimeout(() => p.remove(), 1900);
-    }
+    });
   }
 
-  // CTF: obfuscated flag
-  const enc = "RVRGe0RJTUFfU0tJTExTX0FORF9XSU5TfQ=="; // base64
-  const flag = atob(enc);
+  function showCard(c) {
+    openModal(`
+      <div style="display:grid; grid-template-columns: 1fr 1.2fr; gap: 12px">
+        <div style="border-radius: 18px; border: 1px solid rgba(255,255,255,.12); overflow:hidden; background: rgba(0,0,0,.18)">
+          <div style="height: 220px; ${artStyle(c)}"></div>
+          <div style="padding: 12px">
+            <div style="font-weight: 900; font-size: 18px">${escapeHtml(c.name)}</div>
+            <div style="margin-top:8px; color: rgba(168,179,210,.95)">${escapeHtml(c.text)}</div>
+          </div>
+        </div>
+        <div>
+          <div style="display:flex; gap: 10px; flex-wrap:wrap">
+            <span class="pill mana">${c.cost} маны</span>
+            <span class="pill" style="border-color: rgba(38,231,166,.35); background: rgba(38,231,166,.12)">Атака ${c.attack}</span>
+            <span class="pill hp">ХП ${c.health}</span>
+          </div>
+          <div style="margin-top:10px; color: rgba(168,179,210,.95)">
+            Класс: <b>${c.class}</b> · Редкость: <b>${c.rarity}</b> · id: <code>${c.id}</code>
+          </div>
+          <div style="margin-top:10px; color: rgba(168,179,210,.95)">
+            Теги: ${c.tags.map(t=>`<span class="chip" style="cursor:default">${t}</span>`).join(' ')}
+          </div>
+          <div style="margin-top:14px">
+            <button class="btn btn--small btn--primary" id="addToHand">Добавить в руку (в матче)</button>
+          </div>
+          <div class="toast" style="margin-top:10px">Если хочешь — добавлю больше карт и механику торгов/секретов/баффов.</div>
+        </div>
+      </div>
+    `);
 
-  ctfBtn?.addEventListener("click", () => {
-    // reveal panel area + slight drama
-    document.getElementById("ctf")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    status.textContent = "CTF-панель открыта. Дальше — дело за Димой.";
-    pulse(1);
-  });
+    setTimeout(() => {
+      $('#addToHand')?.addEventListener('click', () => {
+        match = match || null;
+        // if no match — create, then add
+        if (!match) newMatch();
+        match.hand.push(c);
+        closeModal();
+        setRoute('play');
+      });
+    }, 0);
+  }
 
-  flagBtn?.addEventListener("click", () => {
-    const v = (flagInput.value || "").trim();
-    if (!v) {
-      flagStatus.textContent = "Введи флаг.";
-      return;
+  function wireShop() {
+    const toast = $('#shopToast');
+    $('#packBtn')?.addEventListener('click', () => {
+      const picks = shuffle(ALL).slice(0, 5);
+      toast.textContent = `Пак: ${picks.map(p=>p.name).join(' · ')}`;
+      beep('play');
+    });
+  }
+
+  function wireTavern() {
+    const toast = $('#tavernToast');
+    $('#draftBtn')?.addEventListener('click', () => {
+      const trio = shuffle(ALL).slice(0, 3);
+      openModal(`
+        <h2 style="margin:0 0 10px">Драфт (демо)</h2>
+        <p style="margin:0 0 12px; color: rgba(168,179,210,.95)">Выбери 1 из 3 — добавлю в руку.</p>
+        <div style="display:grid; grid-template-columns: repeat(3,1fr); gap: 10px">
+          ${trio.map(c=>`
+            <button class="btn" data-pick="${c.id}" style="text-align:left">
+              <b>${escapeHtml(c.name)}</b><br/>
+              <span style="color: rgba(168,179,210,.95)">${escapeHtml(c.text)}</span>
+            </button>
+          `).join('')}
+        </div>
+      `);
+
+      setTimeout(() => {
+        $$('[data-pick]').forEach((b) => b.addEventListener('click', () => {
+          const id = b.getAttribute('data-pick');
+          const c = ALL.find(x=>x.id===id);
+          if (!c) return;
+          if (!match) newMatch();
+          match.hand.push(c);
+          closeModal();
+          toast.textContent = `Выбран: ${c.name} (добавлен в руку).`;
+          setRoute('play');
+        }));
+      }, 0);
+
+      beep('click');
+    });
+  }
+
+  // ---- Utils ----
+  function shuffle(arr) {
+    const a = arr.slice();
+    for (let i = a.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [a[i], a[j]] = [a[j], a[i]];
     }
-    if (v === flag) {
-      flagStatus.textContent = "Верно. Дима, ты машина.";
-      flagStatus.style.color = "rgba(38,231,166,.95)";
-      pulse(2);
-    } else {
-      flagStatus.textContent = "Не то. Подсказка: в коде всё честно.";
-      flagStatus.style.color = "rgba(255,77,109,.95)";
-    }
-  });
+    return a;
+  }
+  function escapeHtml(s){
+    return String(s).replace(/[&<>"']/g, (c)=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[c]));
+  }
+  function escapeAttr(s){
+    return escapeHtml(s).replace(/\n/g,' ');
+  }
 
-  // Background stars
-  const canvas = document.getElementById("stars");
-  const ctx = canvas.getContext("2d");
-
+  // ---- Background particles ----
+  const canvas = document.getElementById('bg');
+  const ctx = canvas.getContext('2d');
   const DPR = Math.min(2, window.devicePixelRatio || 1);
-  let W = 0, H = 0;
-  let stars = [];
-
-  function resize() {
-    W = Math.floor(window.innerWidth);
-    H = Math.floor(window.innerHeight);
-    canvas.width = Math.floor(W * DPR);
-    canvas.height = Math.floor(H * DPR);
-    canvas.style.width = W + "px";
-    canvas.style.height = H + "px";
-    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
-    const n = Math.min(220, Math.floor((W * H) / 12000));
-    stars = new Array(n).fill(0).map(() => ({
-      x: Math.random() * W,
-      y: Math.random() * H,
-      r: 0.6 + Math.random() * 1.2,
-      a: 0.25 + Math.random() * 0.55,
-      v: 0.15 + Math.random() * 0.45,
+  let W=0,H=0, pts=[];
+  function resize(){
+    W = window.innerWidth|0; H = window.innerHeight|0;
+    canvas.width = (W*DPR)|0; canvas.height=(H*DPR)|0;
+    canvas.style.width=W+'px'; canvas.style.height=H+'px';
+    ctx.setTransform(DPR,0,0,DPR,0,0);
+    const n = Math.min(200, Math.floor((W*H)/14000));
+    pts = Array.from({length:n},()=>({
+      x: Math.random()*W,
+      y: Math.random()*H,
+      r: .6+Math.random()*1.4,
+      a: .15+Math.random()*.35,
+      v: .10+Math.random()*.35,
     }));
   }
-
-  function tick() {
-    ctx.clearRect(0, 0, W, H);
-    for (const s of stars) {
-      s.y += s.v;
-      if (s.y > H + 10) {
-        s.y = -10;
-        s.x = Math.random() * W;
-      }
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    for (const p of pts){
+      p.y += p.v;
+      if (p.y>H+10){ p.y=-10; p.x=Math.random()*W; }
       ctx.beginPath();
-      ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(234,240,255,${s.a})`;
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = `rgba(238,243,255,${p.a})`;
       ctx.fill();
     }
     requestAnimationFrame(tick);
   }
-
-  window.addEventListener("resize", resize, { passive: true });
+  window.addEventListener('resize', resize, {passive:true});
   resize();
   tick();
 
-  // small particles style injected (keeps CSS clean)
-  const style = document.createElement("style");
-  style.textContent = `
-    .p{ position: fixed; width: 8px; height: 8px; border-radius: 3px; z-index: 6; pointer-events:none; box-shadow: 0 8px 22px rgba(0,0,0,.35); }
-  `;
-  document.head.appendChild(style);
+  // boot
+  initFromHash();
 })();

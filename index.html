@@ -4,204 +4,56 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="color-scheme" content="dark" />
-  <title>Привет, Дима</title>
-  <meta name="description" content="Небольшой, но качественный сайт-привет для Димы: хс, аниме, ктф." />
-  <link rel="preload" href="./styles.css" as="style" />
+  <title>CardStone — привет, Дима</title>
+  <meta name="description" content="CardStone — мини-клон по логике Hearthstone, но с оригинальными ассетами: матч, коллекция, таверна." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
-  <a class="skip" href="#content">К контенту</a>
-
-  <canvas id="stars" aria-hidden="true"></canvas>
+  <canvas id="bg" aria-hidden="true"></canvas>
 
   <header class="top">
-    <div class="brand" aria-label="Привет Диме">
-      <span class="brand__dot" aria-hidden="true"></span>
-      <span class="brand__text">privet-dima</span>
+    <div class="logo" role="button" tabindex="0" data-route="home" aria-label="CardStone">
+      <span class="logo__gem" aria-hidden="true"></span>
+      <span class="logo__text">CardStone</span>
+      <span class="logo__sub">by Stas · для Димы</span>
     </div>
 
-    <nav class="nav" aria-label="Навигация">
-      <a href="#hs">хс</a>
-      <a href="#anime">аниме</a>
-      <a href="#ctf">ктф</a>
+    <nav class="nav" aria-label="Меню">
+      <button class="nav__btn" data-route="home">Главная</button>
+      <button class="nav__btn" data-route="play">Играть</button>
+      <button class="nav__btn" data-route="collection">Коллекция</button>
+      <button class="nav__btn" data-route="shop">Магазин</button>
+      <button class="nav__btn" data-route="tavern">Таверна</button>
     </nav>
+
+    <div class="top__right">
+      <button id="soundBtn" class="chip" type="button">Звук: выкл</button>
+      <button id="aboutBtn" class="chip" type="button">Что это?</button>
+    </div>
   </header>
 
-  <main id="content" class="main">
-    <section class="hero" aria-label="Приветствие">
-      <div class="hero__left">
-        <p class="kicker">Сайт-привет</p>
-        <h1>Привет, <span class="glow">Дима</span>.</h1>
-        <p class="lead">
-          Тут без воды: немного <b>хс</b>, щепотка <b>аниме</b> и честный <b>ктф</b>.
-          Сделано так, чтобы выглядело реально аккуратно.
-        </p>
-
-        <div class="hero__actions">
-          <button id="modeBtn" class="btn btn--primary" type="button">
-            Включить «режим Димы»
-          </button>
-          <button id="ctfBtn" class="btn" type="button">
-            Открыть CTF-панель
-          </button>
-        </div>
-
-        <p class="tiny" id="status" role="status" aria-live="polite"></p>
-      </div>
-
-      <div class="hero__right" aria-hidden="true">
-        <div class="orb">
-          <div class="orb__ring"></div>
-          <div class="orb__ring orb__ring--2"></div>
-          <div class="orb__ring orb__ring--3"></div>
-          <div class="orb__core"></div>
-        </div>
-      </div>
-    </section>
-
-    <section class="grid" aria-label="Карточки">
-      <article class="card" id="hs">
-        <h2>хс (Hearthstone)</h2>
-        <p class="muted">Классика: темп, вэлью и топдеки — но без тильта.</p>
-
-        <div class="hs">
-          <div class="hs__row">
-            <span class="hs__label">План на катку:</span>
-            <span class="hs__value">муллиган → темп → считать летал</span>
-          </div>
-          <div class="hs__row">
-            <span class="hs__label">Микро‑правило:</span>
-            <span class="hs__value">если сомневаешься — бери линию, которая сохраняет темп</span>
-          </div>
-
-          <div class="hs__cards" aria-label="Мини-карты">
-            <button class="hs-card" type="button" data-card="mulligan">Муллиган</button>
-            <button class="hs-card" type="button" data-card="tempo">Темп</button>
-            <button class="hs-card" type="button" data-card="value">Вэлью</button>
-            <button class="hs-card" type="button" data-card="lethal">Летал</button>
-          </div>
-
-          <p class="tiny" id="hsHint" role="status" aria-live="polite">Нажми на «мини‑карты».</p>
-
-          <div class="hs__actions">
-            <button id="hsRandomBtn" class="btn btn--small" type="button">Случайная любимая карта</button>
-            <button id="hsQuizBtn" class="btn btn--small" type="button">Мини‑викторина</button>
-            <button id="hsGameBtn" class="btn btn--small btn--primary" type="button">Мини‑игра: «Летал»</button>
-          </div>
-
-          <div id="hsGame" class="hs-game" aria-label="Мини-игра Hearthstone" hidden>
-            <div class="hs-game__top">
-              <div class="hs-game__stat hs-game__stat--hp">
-                <div class="hs-game__label">ХП противника</div>
-                <div class="hs-game__value"><span id="hsEnemyHp">0</span></div>
-              </div>
-              <div class="hs-game__stat hs-game__stat--mana">
-                <div class="hs-game__label">Мана</div>
-                <div class="hs-game__value"><span id="hsMana">0</span>/10</div>
-              </div>
-              <div class="hs-game__stat hs-game__stat--dmg">
-                <div class="hs-game__label">Урон выбран</div>
-                <div class="hs-game__value"><span id="hsDmg">0</span></div>
-              </div>
-              <div class="hs-game__stat hs-game__stat--streak">
-                <div class="hs-game__label">Серия</div>
-                <div class="hs-game__value"><span id="hsStreak">0</span></div>
-              </div>
-            </div>
-
-            <p class="muted" id="hsGameHint">Цель: уложить противника за 1 ход, не превышая 10 маны. Клик по карте — выбрать/снять.</p>
-
-            <div id="hsHand" class="hs-hand" aria-label="Рука"></div>
-
-            <div class="hs-game__actions">
-              <button id="hsGameReset" class="btn btn--small" type="button">Сброс</button>
-              <button id="hsGameCheck" class="btn btn--small" type="button">Проверить летал</button>
-              <button id="hsGameNext" class="btn btn--small" type="button">Следующая</button>
-            </div>
-            <p class="tiny" id="hsGameStatus" role="status" aria-live="polite"></p>
-          </div>
-
-          <div class="hs__gallery" aria-label="Любимые карты (галерея)">
-            <!-- заполняется JS -->
-          </div>
-
-          <p class="tiny">Подсказка Диме: кликай по картам — они раскрываются как карточки.</p>
-        </div>
-
-        <div id="hsModal" class="modal" aria-hidden="true" role="dialog" aria-label="Карточка Hearthstone">
-          <div class="modal__backdrop" data-close="1"></div>
-          <div class="modal__panel" role="document">
-            <button class="modal__close" type="button" data-close="1" aria-label="Закрыть">×</button>
-            <div class="modal__content">
-              <img id="hsModalImg" alt="" loading="lazy" />
-              <div class="modal__text">
-                <h3 id="hsModalTitle">Карта</h3>
-                <p id="hsModalBody" class="muted"></p>
-                <p id="hsModalMeta" class="tiny"></p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chip-row" aria-label="Теги">
-          <span class="chip">tempo</span>
-          <span class="chip">value</span>
-          <span class="chip">ladder</span>
-        </div>
-      </article>
-
-      <article class="card" id="anime">
-        <h2>аниме</h2>
-        <p class="muted">Секция для настроения. Без спойлеров, только вайб.</p>
-        <div class="quote" role="group" aria-label="Цитата">
-          <p id="quoteText">«Если сейчас тяжело — значит ты прокачиваешься.»</p>
-          <button id="quoteBtn" class="link" type="button">ещё одну</button>
-        </div>
-        <div class="anime-bars" aria-hidden="true">
-          <div></div><div></div><div></div><div></div><div></div>
-        </div>
-      </article>
-
-      <article class="card" id="ctf">
-        <h2>ктф</h2>
-        <p class="muted">Здесь всё по-честному: цели, подсказки, флаг.</p>
-
-        <div class="ctf">
-          <div class="ctf__row">
-            <span class="ctf__label">Задача:</span>
-            <span class="ctf__value">найти скрытую строку (hint ниже)</span>
-          </div>
-          <div class="ctf__row">
-            <span class="ctf__label">Hint:</span>
-            <span class="ctf__value">кнопка, которая «открывает панель»</span>
-          </div>
-
-          <details class="ctf__details">
-            <summary>Показать поле для флага</summary>
-            <div class="ctf__form">
-              <label class="sr-only" for="flagInput">Флаг</label>
-              <input id="flagInput" type="text" inputmode="text" autocomplete="off" placeholder="CTF{...}" />
-              <button id="flagBtn" class="btn btn--small" type="button">проверить</button>
-            </div>
-            <p class="tiny" id="flagStatus" role="status" aria-live="polite"></p>
-          </details>
-        </div>
-      </article>
-    </section>
-
-    <section class="footer" aria-label="Футер">
-      <p>
-        Сделано с уважением к вкусу Димы: аккуратно, быстро, с небольшим «пасхальным яйцом».
-      </p>
-      <p class="tiny">© <span id="year"></span> privet-dima · GitHub Pages</p>
-    </section>
+  <main class="app" id="app" aria-live="polite">
+    <!-- views are rendered by JS -->
   </main>
 
-  <!--
-    CTF hint (for Dima):
-    the flag lives in the JS as an obfuscated string.
-    if you want it the honest way: open the CTF panel.
-  -->
+  <footer class="foot">
+    <div class="foot__grid">
+      <div>
+        <div class="foot__title">CardStone</div>
+        <div class="foot__muted">Мини‑игра по логике "карточного баттлера". Без ассетов и брендинга Blizzard.</div>
+      </div>
+      <div class="foot__muted">Управление: мышь/тач. В матче перетаскивай карты на поле. ESC закрывает окна.</div>
+      <div class="foot__muted">© <span id="year"></span></div>
+    </div>
+  </footer>
+
+  <div id="modal" class="modal" aria-hidden="true" role="dialog" aria-label="Окно">
+    <div class="modal__backdrop" data-close="1"></div>
+    <div class="modal__panel" role="document">
+      <button class="modal__close" type="button" data-close="1" aria-label="Закрыть">×</button>
+      <div id="modalBody" class="modal__body"></div>
+    </div>
+  </div>
 
   <script defer src="./script.js"></script>
 </body>
