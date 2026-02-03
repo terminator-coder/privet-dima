@@ -128,7 +128,7 @@
     },
   ].filter(c => !c.hidden);
 
-  const artUrl = (id) => `https://art.hearthstonejson.com/v1/render/latest/enUS/256x/${id}.png`;
+  const artUrl = (id) => `https://art.hearthstonejson.com/v1/render/latest/enUS/512x/${id}.png`;
 
   function openModal(card) {
     if (!hsModal) return;
@@ -233,8 +233,8 @@
     { id: 'EX1_116', name: 'Лирой Дженкинс', mana: 5, dmg: 6, text: 'Рывок. 6 урона сразу.' },
     { id: 'CS2_124', name: 'Волчий всадник', mana: 3, dmg: 3, text: 'Рывок. 3 урона.' },
     { id: 'EX1_238', name: 'Громмаш Адский Крик', mana: 8, dmg: 4, text: 'Рывок. 4 урона (без энрейджа).', note: 'без комбо' },
-    { id: 'EX1_046', name: 'Темный железный дворф', mana: 4, dmg: 0, text: 'В этой мини‑игре бафы игнорируются.', note: 'филлер' },
-    { id: 'EX1_559', name: 'Арханитовый жнец', mana: 5, dmg: 0, text: 'Оружие? В мини‑игре нет.', note: 'филлер' },
+    { id: 'EX1_116', name: 'Лирой Дженкинс', mana: 5, dmg: 6, text: 'Рывок. 6 урона сразу.' },
+    { id: 'CS2_124', name: 'Волчий всадник', mana: 3, dmg: 3, text: 'Рывок. 3 урона.' },
   ];
 
   let game = {
