@@ -130,22 +130,35 @@
   let match = null;
 
   function newMatch() {
-    const deck = shuffle(ALL.filter(c => c.class === 'Neutral' || c.class === 'Mage').concat(ALL.filter(c=>c.class==='Neutral'))).slice(0, 14);
-    const enemyDeck = shuffle(ALL.filter(c => c.class === 'Neutral' || c.class === 'Rogue').concat(ALL.filter(c=>c.class==='Neutral'))).slice(0, 14);
+    // copy arrays so splice doesn't mutate the referenced deck stored in match
+    const deck = shuffle(
+      ALL.filter(c => c.class === 'Neutral' || c.class === 'Mage')
+        .concat(ALL.filter(c => c.class === 'Neutral'))
+    ).slice(0, 14);
+
+    const enemyDeck = shuffle(
+      ALL.filter(c => c.class === 'Neutral' || c.class === 'Rogue')
+        .concat(ALL.filter(c => c.class === 'Neutral'))
+    ).slice(0, 14);
+
+    const hand = deck.slice(0, 3);
+    const enemyHand = enemyDeck.slice(0, 3);
+
     match = {
       turn: 1,
       mana: 1,
       manaMax: 1,
       hp: 30,
       enemyHp: 30,
-      deck,
-      enemyDeck,
-      hand: deck.splice(0, 3),
-      enemyHand: enemyDeck.splice(0, 3),
+      deck: deck.slice(3),
+      enemyDeck: enemyDeck.slice(3),
+      hand,
+      enemyHand,
       myLane: [],
       enemyLane: [],
       toast: 'Твой ход. Считай летал.',
     };
+
     beep('play');
   }
 
