@@ -1,0 +1,25 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='768' viewBox='0 0 1024 768'>
+
+  <defs>
+    <linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0' stop-color='hsl(254 55% 18%)'/>
+      <stop offset='1' stop-color='hsl(5 65% 14%)'/>
+    </linearGradient>
+    <radialGradient id='gl' cx='30%' cy='25%' r='70%'>
+      <stop offset='0' stop-color='hsl(314 90% 70%)' stop-opacity='.45'/>
+      <stop offset='1' stop-color='hsl(125 90% 60%)' stop-opacity='0'/>
+    </radialGradient>
+    <filter id='soft' x='-20%' y='-20%' width='140%' height='140%'>
+      <feGaussianBlur stdDeviation='10'/>
+    </filter>
+  </defs>
+  <rect width='1024' height='768' fill='url(#bg)'/>
+  <circle cx='260' cy='220' r='320' fill='url(#gl)'/>
+  
+<g filter='url(#soft)'>
+<circle cx='488' cy='193' r='8' fill='hsl(225 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='577' cy='356' r='6' fill='hsl(225 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='146' cy='432' r='5' fill='hsl(14 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='606' cy='337' r='6' fill='hsl(74 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='209' cy='231' r='5' fill='hsl(74 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='638' cy='447' r='8' fill='hsl(74 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='153' cy='409' r='4' fill='hsl(74 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='671' cy='359' r='3' fill='hsl(225 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='354' cy='430' r='7' fill='hsl(74 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='120' cy='151' r='6' fill='hsl(225 90% 70%)' opacity='.35' filter='url(#soft)'/>
+</g>
+<g filter='url(#soft)'><path d='M700 170c-120 0-210 70-210 180v100c0 140 120 210 210 250 90-40 210-110 210-250V350c0-110-90-180-210-180z' fill='hsl(14 30% 22%)' opacity='.65' stroke='rgba(255,255,255,.18)' stroke-width='5'/><path d='M700 220c-90 0-155 52-155 130v84c0 104 92 160 155 190 63-30 155-86 155-190v-84c0-78-65-130-155-130z' fill='hsl(14 80% 55%)' opacity='.22'/></g>
+<text x='64' y='708' fill='rgba(238,243,255,.92)' font-size='46' font-family='system-ui, -apple-system, Segoe UI, Roboto'>Страж Бастиона</text>
+<text x='64' y='744' fill='rgba(168,179,210,.92)' font-size='22' font-family='system-ui, -apple-system, Segoe UI, Roboto'>CardStone • иллюстрация (генер.)</text>
+</svg>

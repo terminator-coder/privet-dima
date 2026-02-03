@@ -1,0 +1,25 @@
+<svg xmlns='http://www.w3.org/2000/svg' width='1024' height='768' viewBox='0 0 1024 768'>
+
+  <defs>
+    <linearGradient id='bg' x1='0' y1='0' x2='1' y2='1'>
+      <stop offset='0' stop-color='hsl(247 55% 18%)'/>
+      <stop offset='1' stop-color='hsl(338 65% 14%)'/>
+    </linearGradient>
+    <radialGradient id='gl' cx='30%' cy='25%' r='70%'>
+      <stop offset='0' stop-color='hsl(307 90% 70%)' stop-opacity='.45'/>
+      <stop offset='1' stop-color='hsl(98 90% 60%)' stop-opacity='0'/>
+    </radialGradient>
+    <filter id='soft' x='-20%' y='-20%' width='140%' height='140%'>
+      <feGaussianBlur stdDeviation='10'/>
+    </filter>
+  </defs>
+  <rect width='1024' height='768' fill='url(#bg)'/>
+  <circle cx='260' cy='220' r='320' fill='url(#gl)'/>
+  
+<g filter='url(#soft)'>
+<circle cx='670' cy='290' r='7' fill='hsl(67 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='427' cy='263' r='7' fill='hsl(67 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='303' cy='330' r='3' fill='hsl(67 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='451' cy='268' r='4' fill='hsl(7 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='796' cy='423' r='7' fill='hsl(7 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='424' cy='475' r='3' fill='hsl(198 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='622' cy='128' r='5' fill='hsl(7 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='208' cy='231' r='8' fill='hsl(7 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='604' cy='184' r='7' fill='hsl(198 90% 70%)' opacity='.35' filter='url(#soft)'/><circle cx='484' cy='512' r='8' fill='hsl(67 90% 70%)' opacity='.35' filter='url(#soft)'/>
+</g>
+<g filter='url(#soft)'><path d='M610 180l260 160-260 160-110-70 100-90-100-90z' fill='hsl(7 90% 62%)' opacity='.85'/><path d='M610 180l260 160-260 160-110-70 100-90-100-90z' fill='none' stroke='hsl(198 90% 70%)' stroke-opacity='.55' stroke-width='6'/></g>
+<text x='64' y='708' fill='rgba(238,243,255,.92)' font-size='46' font-family='system-ui, -apple-system, Segoe UI, Roboto'>Смелый Разведчик</text>
+<text x='64' y='744' fill='rgba(168,179,210,.92)' font-size='22' font-family='system-ui, -apple-system, Segoe UI, Roboto'>CardStone • иллюстрация (генер.)</text>
+</svg>
