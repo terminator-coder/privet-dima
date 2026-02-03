@@ -61,17 +61,33 @@
 
     <section class="grid" aria-label="Карточки">
       <article class="card" id="hs">
-        <h2>хс</h2>
-        <p class="muted">Хард-скиллы, чтобы всё работало и не разваливалось.</p>
-        <ul>
-          <li>Логика → порядок → результат</li>
-          <li>Скорость без хаоса</li>
-          <li>Точность, когда важно</li>
-        </ul>
+        <h2>хс (Hearthstone)</h2>
+        <p class="muted">Классика: темп, вэлью и топдеки — но без тильта.</p>
+
+        <div class="hs">
+          <div class="hs__row">
+            <span class="hs__label">План на катку:</span>
+            <span class="hs__value">муллиган → темп → считать летал</span>
+          </div>
+          <div class="hs__row">
+            <span class="hs__label">Микро‑правило:</span>
+            <span class="hs__value">если сомневаешься — бери линию, которая сохраняет темп</span>
+          </div>
+
+          <div class="hs__cards" aria-label="Мини-карты">
+            <button class="hs-card" type="button" data-card="mulligan">Муллиган</button>
+            <button class="hs-card" type="button" data-card="tempo">Темп</button>
+            <button class="hs-card" type="button" data-card="value">Вэлью</button>
+            <button class="hs-card" type="button" data-card="lethal">Летал</button>
+          </div>
+
+          <p class="tiny" id="hsHint" role="status" aria-live="polite">Нажми на «мини‑карты».</p>
+        </div>
+
         <div class="chip-row" aria-label="Теги">
-          <span class="chip">focus</span>
-          <span class="chip">discipline</span>
-          <span class="chip">craft</span>
+          <span class="chip">tempo</span>
+          <span class="chip">value</span>
+          <span class="chip">ladder</span>
         </div>
       </article>
 

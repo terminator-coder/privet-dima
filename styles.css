@@ -250,6 +250,23 @@ h1{ margin: 0 0 12px; font-size: clamp(34px, 4vw, 56px); line-height: 1.05; }
   50%{ transform: scaleY(1.0); }
 }
 
+.hs{ margin-top: 10px; }
+.hs__row{ display:flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,.10); }
+.hs__label{ color: rgba(169,180,208,.92); }
+.hs__value{ color: rgba(234,240,255,.9); text-align: right; }
+.hs__cards{ display:flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.hs-card{
+  border: 1px solid rgba(255,255,255,.14);
+  background: rgba(0,0,0,.16);
+  color: rgba(234,240,255,.9);
+  border-radius: 999px;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: transform .10s ease, background .15s ease, border-color .15s ease;
+}
+.hs-card:hover{ transform: translateY(-1px); background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.22); }
+.hs-card:focus{ outline: 2px solid rgba(124,92,255,.55); outline-offset: 2px; }
+
 .ctf{ margin-top: 10px; }
 .ctf__row{ display:flex; justify-content: space-between; gap: 10px; padding: 8px 0; border-bottom: 1px dashed rgba(255,255,255,.10); }
 .ctf__label{ color: rgba(169,180,208,.92); }

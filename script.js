@@ -7,6 +7,7 @@
   const year = $("year");
   const quoteText = $("quoteText");
   const quoteBtn = $("quoteBtn");
+  const hsHint = $("hsHint");
   const flagInput = $("flagInput");
   const flagBtn = $("flagBtn");
   const flagStatus = $("flagStatus");
@@ -20,6 +21,7 @@
     "«Дисциплина — это когда мотивация не нужна.»",
     "«Не магия, а практика.»",
     "«Победа — это сумма маленьких решений.»",
+    "«Сначала считай летал, потом красиво играй.»",
   ];
   let qi = 0;
   quoteBtn?.addEventListener("click", () => {
@@ -45,6 +47,23 @@
       : "Режим Димы выключен: возвращаемся в базу.";
 
     if (mode) pulse(2);
+  });
+
+  // Hearthstone mini-cards
+  const HS = {
+    mulligan: "Муллиган: оставляй план на 1–3 хода. В сомнениях — бери карту, которая ускоряет темп.",
+    tempo: "Темп: ставь угрозы так, чтобы оппонент тратил ману реактивно.",
+    value: "Вэлью: не жадничай. Вэлью хорошо, когда оно не отдаёт темп бесплатно.",
+    lethal: "Летал: сначала посчитай урон (с учётом силы героя/баффов), потом жми кнопки.",
+  };
+
+  document.querySelectorAll('.hs-card').forEach((b) => {
+    b.addEventListener('click', () => {
+      const key = b.getAttribute('data-card');
+      if (!key || !HS[key]) return;
+      hsHint.textContent = HS[key];
+      pulse(1);
+    });
   });
 
   // Tiny confetti (no libs)
